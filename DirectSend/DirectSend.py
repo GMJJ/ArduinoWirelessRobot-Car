@@ -5,7 +5,8 @@ import websockets
 import atexit
 import threading
 
-port = '/dev/ttyACM0'
+#port = '/dev/ttyACM0'
+port = "Com13"
 ser = serial.Serial(port, 115200, timeout=0.05)
 ser.reset_input_buffer()
 
