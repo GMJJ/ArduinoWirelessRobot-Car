@@ -26,34 +26,37 @@ def updateSerial():
 serialThread = threading.Thread(target=updateSerial)
 serialThread.start()
 
-async def handleSocket():
+async def handleSocket(ws):
     global leftSpeed
     global rightSpeed
     try:
-        async with websockets.connect("ws://192.168.1.69:3000") as ws:
-            while(True):
-                recievedData = await ws.recv()
-                print(recievedData)
-                leftSpeed = float(recievedData.split(",")[0])+float(recievedData.split(",")[1])
-                rightSpeed = float(recievedData.split(",")[0])-float(recievedData.split(",")[1])
-                if(abs(leftSpeed)<.2):
-                    leftSpeed = 0;
-                if(abs(rightSpeed)<.2):
-                    rightSpeed = 0;
-                if(leftSpeed>1):
-                    leftSpeed = 1
-                if(leftSpeed<-1):
-                    leftSpeed = -1
-                if(rightSpeed>1):
-                    rightSpeed = 1
-                if(rightSpeed<-1):
-                    rightSpeed = -1
-                await ws.send("Roger")
+        while(True):
+            recievedData = await ws.recv()
+            print(recievedData)
+            leftSpeed = float(recievedData.split(",")[0])+float(recievedData.split(",")[1])
+            rightSpeed = float(recievedData.split(",")[0])-float(recievedData.split(",")[1])
+            if(abs(leftSpeed)<.2):
+                leftSpeed = 0;
+            if(abs(rightSpeed)<.2):
+                rightSpeed = 0;
+            if(leftSpeed>1):
+                leftSpeed = 1
+            if(leftSpeed<-1):
+                leftSpeed = -1
+            if(rightSpeed>1):
+                rightSpeed = 1
+            if(rightSpeed<-1):
+                rightSpeed = -1
+            await ws.send("Roger")
     except:
         pass
 
-if __name__ == '__main__':
-    while(True):
-        asyncio.run(handleSocket())        
 
+
+async def main():
+    async with websockets.serve(handleSocket, None, 3000):
+        await asyncio.Future()  # run forever       
+
+if __name__ == '__main__':
+    asyncio.run(main())
 atexit.register(sendSerial, (0,0))
